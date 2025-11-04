@@ -1,44 +1,79 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
-from .models import Book, Library
-from django.views.generic.detail import DetailView
+# relationship_app/views.py
 
-# List all books (Function-Based View)
+# Django imports
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.views.generic.detail import DetailView
+from django.contrib.auth.decorators import user_passes_test
+
+# Models
+from .models import Author, Book, Library, Librarian, UserProfile
+
+# -----------------------------
+# Function-Based Views (Books)
+# -----------------------------
 def list_books(request):
     books = Book.objects.all()
-    return render(request, "relationship_app/list_books.html", {'books': books})
+    return render(request, "relationship_app/list_books.html", {"books": books})
 
-# Library detail (Class-Based View)
+# -----------------------------
+# Class-Based Views (Library)
+# -----------------------------
 class LibraryDetailView(DetailView):
     model = Library
     template_name = "relationship_app/library_detail.html"
     context_object_name = "library"
 
-# User registration
+# -----------------------------
+# User Authentication Views
+# -----------------------------
 def register_view(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('list_books')
+            return redirect("list_books")
     else:
         form = UserCreationForm()
-    return render(request, "relationship_app/register.html", {'form': form})
-from django.contrib.auth.decorators import user_passes_test
+    return render(request, "relationship_app/register.html", {"form": form})
 
-# Admin view
-@user_passes_test(lambda u: u.userprofile.role == 'Admin')
+def login_view(request):
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect("list_books")
+    else:
+        form = AuthenticationForm()
+    return render(request, "relationship_app/login.html", {"form": form})
+
+def logout_view(request):
+    logout(request)
+    return render(request, "relationship_app/logout.html")
+
+# -----------------------------
+# Role-Based Access Control Views
+# -----------------------------
+def is_admin(user):
+    return hasattr(user, "userprofile") and user.userprofile.role == "Admin"
+
+def is_librarian(user):
+    return hasattr(user, "userprofile") and user.userprofile.role == "Librarian"
+
+def is_member(user):
+    return hasattr(user, "userprofile") and user.userprofile.role == "Member"
+
+@user_passes_test(is_admin)
 def admin_view(request):
-    return render(request, 'relationship_app/admin_view.html')
+    return render(request, "relationship_app/admin_view.html")
 
-# Librarian view
-@user_passes_test(lambda u: u.userprofile.role == 'Librarian')
+@user_passes_test(is_librarian)
 def librarian_view(request):
-    return render(request, 'relationship_app/librarian_view.html')
+    return render(request, "relationship_app/librarian_view.html")
 
-# Member view
-@user_passes_test(lambda u: u.userprofile.role == 'Member')
+@user_passes_test(is_member)
 def member_view(request):
-    return render(request, 'relationship_app/member_view.html')
+    return render(request, "relationship_app/member_view.html")
