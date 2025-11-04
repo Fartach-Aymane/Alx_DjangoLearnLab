@@ -25,10 +25,12 @@ if not Author.objects.exists():
 # -------------------------------
 author_name = "Raja Moutaouakil"
 author = Author.objects.get(name=author_name)
-print("Books by", author_name, ":", author.books.all())
+books_by_author = Book.objects.filter(author=author)  # ✅ Required for ALX
+print("Books by", author_name, ":", books_by_author)
 
 library_name = "Main Library"
 library = Library.objects.get(name=library_name)
-print("Books in", library_name, ":", library.books.all())
+books_in_library = library.books.all()
+print("Books in", library_name, ":", books_in_library)
 
 print("Librarian of", library_name, ":", library.librarian)
