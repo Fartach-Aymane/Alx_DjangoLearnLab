@@ -1,9 +1,11 @@
 
+# relationship_app/urls.py
+
 from django.urls import path
+from django.contrib.auth.views import LoginView, LogoutView
 from .views import list_books  # Function-based view
 from .views import LibraryDetailView  # Class-based view
-
-from .views import register_view, login_view, logout_view  # Authentication views
+from .views import register_view  # Registration view
 from .views import admin_view, librarian_view, member_view  # Role-based views
 
 urlpatterns = [
@@ -11,10 +13,10 @@ urlpatterns = [
     path('books/', list_books, name='list_books'),
     path('library/<int:pk>/', LibraryDetailView.as_view(), name='library_detail'),
 
-    # User Authentication URLs
+    # User Authentication URLs using Django built-in views
     path('register/', register_view, name='register'),
-    path('login/', login_view, name='login'),
-    path('logout/', logout_view, name='logout'),
+    path('login/', LoginView.as_view(template_name='relationship_app/login.html'), name='login'),
+    path('logout/', LogoutView.as_view(template_name='relationship_app/logout.html'), name='logout'),
 
     # Role-Based Access Control URLs
     path('admin-view/', admin_view, name='admin_view'),
