@@ -16,6 +16,13 @@ class Book(models.Model):
 
     def __str__(self):
         return self.title
+    
+    class Meta:
+        permissions = [
+            ("can_add_book", "Can add book"),
+            ("can_edit_book", "Can edit book"),
+            ("can_delete_book", "Can delete book"),
+        ]
 
 
 # Many-to-Many Relationship: Library ↔ Book
@@ -25,8 +32,7 @@ class Library(models.Model):
 
     def __str__(self):
         return self.name
-
-
+    
 # One-to-One Relationship: Library ↔ Librarian
 class Librarian(models.Model):
     name = models.CharField(max_length=100)
