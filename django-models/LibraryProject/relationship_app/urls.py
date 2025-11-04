@@ -1,17 +1,8 @@
 from django.urls import path
-from . import views
+from .views import list_books  # Explicit import required by ALX
+from .views import LibraryDetailView  # Explicit import for CBV
 
 urlpatterns = [
-    # Function-Based View
-    path('books/', views.list_books, name='list_books'),
-
-    # Class-Based View
-    path('library/<int:pk>/', views.LibraryDetailView.as_view(), name='library_detail'),
-]
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('relationship_app.urls')),  # include our app URLs
+    path('books/', list_books, name='list_books'),  # Function-Based View
+    path('library/<int:pk>/', LibraryDetailView.as_view(), name='library_detail'),  # Class-Based View
 ]
