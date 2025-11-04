@@ -4,6 +4,7 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from . import views  # Import the whole views module
+from .views import admin_view, librarian_view, member_view
 
 urlpatterns = [
     # Function-based and Class-based views for books and libraries

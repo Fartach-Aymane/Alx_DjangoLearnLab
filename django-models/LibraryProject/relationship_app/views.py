@@ -9,7 +9,9 @@ from django.contrib.auth.decorators import user_passes_test
 from .models import Library, Book, Author  # Include other models if you use them
 # Models
 from .models import Author, Book, Library, Librarian, UserProfile
-
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import render
+from .models import UserProfile
 # -----------------------------
 # Function-Based Views (Books)
 # -----------------------------
