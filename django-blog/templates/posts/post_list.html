@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'posts/css/styles.css' %}">
+    <title>Blog Posts</title>
+</head>
+<body>
+    <header>
+        <h1>Blog Posts</h1>
+        <a href="{% url 'post_create' %}">Create New Post</a>
+    </header>
+    <main>
+        {% for post in posts %}
+            <article>
+                <h2><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a></h2>
+                <p>{{ post.content|truncatewords:30 }}</p>
+                <p><em>Published on: {{ post.published_date }}</em></p>
+            </article>
+        {% empty %}
+            <p>No posts available.</p>
+        {% endfor %}
+    </main>
+</body>
+</html>

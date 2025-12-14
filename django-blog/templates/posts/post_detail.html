@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'posts/css/styles.css' %}">
+    <title>{{ post.title }}</title>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ post.title }}</h1>
+        <p><em>Published on {{ post.published_date }}</em></p>
+        <div class="content">
+            {{ post.content|safe }}
+        </div>
+
+        <h2>Comments</h2>
+        <div class="comments">
+            {% for comment in post.comments.all %}
+                <div class="comment">
+                    <p><strong>{{ comment.author }}</strong> said:</p>
+                    <p>{{ comment.content }}</p>
+                    <p><em>Posted on {{ comment.created_at }}</em></p>
+                </div>
+            {% empty %}
+                <p>No comments yet.</p>
+            {% endfor %}
+        </div>
+
+        <h3>Add a Comment</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Submit</button>
+        </form>
+
+        <a href="{% url 'post_list' %}">Back to Posts</a>
+    </div>
+</body>
+</html>

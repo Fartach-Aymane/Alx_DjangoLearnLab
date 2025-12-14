@@ -25,12 +25,14 @@ load_dotenv()
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'dev-secret-key-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+if DEBUG:
+    ALLOWED_HOSTS.extend(['*'])
 
 
 # Application definition
@@ -86,16 +88,23 @@ WSGI_APPLICATION = 'social_media_api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', 3306),
+# Use dj_database_url if DATABASE_URL is set, otherwise use SQLite for development
+if os.getenv('DATABASE_URL'):
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+            default=os.getenv('DATABASE_URL')
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -155,18 +164,34 @@ AUTH_USER_MODEL = 'accounts.user'
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
 
-DATABASES['default'] = dj_database_url.config(conn_max_age=600)
+# Activate Django-Heroku only if running in production
+# Only use django_heroku if DATABASE_URL is explicitly set (Heroku environment)
+if os.getenv('DATABASE_URL'):
+    try:
+        django_heroku.settings(locals())
+    except Exception as e:
+        # Not running on Heroku or configuration issue, continue
+        pass
 
-# Activate Django-Heroku
-django_heroku.settings(locals())
-
-# Secure settings
-SECURE_BROWSER_XSS_FILTER = True
-X_FRAME_OPTIONS = 'DENY'
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_SSL_REDIRECT = True  # Automatically redirect HTTP to HTTPS if using SSL
+# Secure settings (override for development)
+if DEBUG:
+    SECURE_BROWSER_XSS_FILTER = False
+    X_FRAME_OPTIONS = 'ALLOW'
+    SECURE_CONTENT_TYPE_NOSNIFF = False
+    SECURE_SSL_REDIRECT = False
+else:
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_SSL_REDIRECT = True
 
 
 
