@@ -9,16 +9,20 @@ from .serializers import UserSerializer, LoginSerializer, UserProfileSerializer
 
 # User Registration
 class RegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
+    
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token = Token.objects.get(user=user)
+            token = Token.objects.get_or_create(user=user)[0]
             return Response({'token': token.key}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # User Login
 class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+    
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
