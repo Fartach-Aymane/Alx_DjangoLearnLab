@@ -13,11 +13,11 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['username', 'password', 'email', 'bio', 'profile_picture']
+        fields = ['username', 'password', 'bio', 'profile_picture', 'followers']
         extra_kwargs = {
-            'email': {'required': False},
             'bio': {'required': False},
             'profile_picture': {'required': False},
+            'followers': {'required': False},
         }
 
     def create(self, validated_data):
@@ -33,18 +33,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 # Serializer for User Profile (viewing profile)
 class UserProfileSerializer(serializers.ModelSerializer):
-    following_count = serializers.SerializerMethodField()
-    followers_count = serializers.SerializerMethodField()
-    
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'bio', 'profile_picture', 'following_count', 'followers_count']
-    
-    def get_following_count(self, obj):
-        return obj.following.count()
-    
-    def get_followers_count(self, obj):
-        return obj.followed_by.count()
+        fields = ['username', 'bio', 'profile_picture', 'followers']
 
 # Serializer for Login (authentication)
 class LoginSerializer(serializers.Serializer):

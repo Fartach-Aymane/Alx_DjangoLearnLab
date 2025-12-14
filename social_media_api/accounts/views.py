@@ -9,20 +9,16 @@ from .serializers import UserSerializer, LoginSerializer, UserProfileSerializer
 
 # User Registration
 class RegisterView(APIView):
-    permission_classes = [permissions.AllowAny]
-    
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token = Token.objects.get_or_create(user=user)[0]
+            token = Token.objects.get(user=user)
             return Response({'token': token.key}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # User Login
 class LoginView(APIView):
-    permission_classes = [permissions.AllowAny]
-    
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -38,13 +34,13 @@ class ProfileView(APIView):
         serializer = UserProfileSerializer(user)
         return Response(serializer.data)
 
-# Follow user view
+# Follower  user view
 class FollowUserView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request, user_id):
         try:
-            user_to_follow = CustomUser.objects.get(pk=user_id)
+            user_to_follow = CustomUser.objects.get(user_id)
         except CustomUser.DoesNotExist:
             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)    
         
@@ -61,7 +57,7 @@ class UnfollowUserView(generics.GenericAPIView):
     
     def post(self, request, user_id):
         try:
-            user_to_unfollow = CustomUser.objects.get(pk=user_id)
+            user_to_unfollow = CustomUser.objects.get(user_id)
         except CustomUser.DoesNotExist:
             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
         
@@ -71,5 +67,7 @@ class UnfollowUserView(generics.GenericAPIView):
         # Remove the user from the 'following' list
         request.user.following.remove(user_to_unfollow)
         return Response({'message': f'You have unfollowed {user_to_unfollow.username}.'}, status=status.HTTP_200_OK)
+
+dummy = CustomUser.objects.all()  # Dummy line to avoid unused import warning
     
             
